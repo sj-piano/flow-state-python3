@@ -1,3 +1,4 @@
+import json
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -14,11 +15,14 @@ class TestCacheService(unittest.TestCase):
         self.mock_redis = mock_redis.return_value
 
     def test_save_calls_setex(self):
-        self.cache_service.save('test_key', 'test_value')
+        value = 'test_value'
+        value_str = json.dumps(value)
+        self.cache_service.save('test_key', value)
         default_lifetime = 30
-        self.mock_redis.setex.assert_called_once_with('test_key', default_lifetime, 'test_value')
+        self.mock_redis.setex.assert_called_once_with('test_key', default_lifetime, value_str)
 
     def test_retrieve_calls_get(self):
+        self.mock_redis.get.return_value = json.dumps('test_value')
         self.cache_service.retrieve('test_key')
         self.mock_redis.get.assert_called_once_with('test_key')
 
